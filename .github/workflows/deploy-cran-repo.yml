@@ -23,7 +23,13 @@ on:
         default: false
         type: boolean
         required: false
-
+      env:
+        description: |
+          Environment variables passed to docker run.
+          One per line, format KEY=VALUE
+        default: ""
+        type: string
+        required: false
 name: Build and deploy wasm R package repository
 
 jobs:
@@ -81,6 +87,7 @@ jobs:
           repo-path: _site
           webr-image: ${{ inputs.webr-image }}
           compress: ${{ inputs.compress }}
+          env: ${{ inputs.env }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
