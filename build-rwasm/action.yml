@@ -28,6 +28,12 @@ inputs:
     default: false
     type: boolean
     required: false
+  env:
+    description: |
+      Environment variables passed to docker run.
+      One per line, format KEY=VALUE
+    default: ""
+    required: false
 runs:
 #  using: 'docker'
 #  image: 'Dockerfile'
@@ -44,6 +50,17 @@ runs:
     - run: docker build ${{github.action_path}} --build-arg WEBR_IMAGE=${{ inputs.webr-image }} -t r-wasm-build-rwasm:${GITHUB_SHA}
       shell: bash
     - run: |
-        docker run --rm -v $(pwd):/github/workspace --workdir /github/workspace r-wasm-build-rwasm:${GITHUB_SHA} \
-        /code.R "${{ inputs.image-path }}" "${{ inputs.repo-path }}" "${{ inputs.compress }}" "${{ inputs.packages }}" "${{ inputs.strip }}"
+        DOCKER_ENVS=""
+        while IFS= read -r line; do
+          [ -z "$line" ] && continue
+          DOCKER_ENVS="$DOCKER_ENVS -e $line"
+        done <<< "${{ inputs.env }}"
+    
+        docker run --rm \
+          $DOCKER_ENVS \
+          -v "$(pwd)":/github/workspace \
+          --workdir /github/workspace \
+          r-wasm-build-rwasm:${GITHUB_SHA} \
+          /code.R "${{ inputs.image-path }}" "${{ inputs.repo-path }}" "${{ inputs.compress }}" "${{ inputs.packages }}" "${{ inputs.strip }}"
       shell: bash
+    
