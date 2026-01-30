@@ -50,17 +50,38 @@ runs:
     - run: docker build ${{github.action_path}} --build-arg WEBR_IMAGE=${{ inputs.webr-image }} -t r-wasm-build-rwasm:${GITHUB_SHA}
       shell: bash
     - run: |
-        DOCKER_ENVS=""
+        set -euo pipefail
+    
+        # Build docker -e args from inputs.env (KEY=VALUE per line)
+        DOCKER_ENVS=()
         while IFS= read -r line; do
-          [ -z "$line" ] && continue
-          DOCKER_ENVS="$DOCKER_ENVS -e $line"
+          # trim leading/trailing spaces
+          line="${line#"${line%%[![:space:]]*}"}"
+          line="${line%"${line##*[![:space:]]}"}"
+    
+          # skip empty lines and comments
+          [[ -z "$line" || "${line:0:1}" == "#" ]] && continue
+    
+          # basic validation
+          if [[ "$line" != *=* ]]; then
+            echo "Invalid env line (expected KEY=VALUE): $line" >&2
+            exit 1
+          fi
+          key="${line%%=*}"
+          if [[ ! "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+            echo "Invalid env var name: $key" >&2
+            exit 1
+          fi
+    
+          DOCKER_ENVS+=("-e" "$line")
         done <<< "${{ inputs.env }}"
     
         docker run --rm \
-          $DOCKER_ENVS \
+          "${DOCKER_ENVS[@]}" \
           -v "$(pwd)":/github/workspace \
           --workdir /github/workspace \
           r-wasm-build-rwasm:${GITHUB_SHA} \
           /code.R "${{ inputs.image-path }}" "${{ inputs.repo-path }}" "${{ inputs.compress }}" "${{ inputs.packages }}" "${{ inputs.strip }}"
       shell: bash
+
     
