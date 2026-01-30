@@ -63,8 +63,8 @@ jobs:
       - name: Checkout r-wasm/actions repository
         uses: actions/checkout@v4
         with:
-          ref: v2
-          repository: r-wasm/actions
+          ref: v4
+          repository: arnaud-feldmann/actions
           token: ${{ secrets.GITHUB_TOKEN }}
           path: .actions
 
