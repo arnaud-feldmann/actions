@@ -9,7 +9,7 @@ jobs:
   reuse-workflow-repo:
     uses: ./.github/workflows/deploy-cran-repo.yml
     with:
-      packages: disaggR tidyverse arrow
+      packages: cli generics glue lifecycle magrittr methods pillar R6 rlang tibble tidyselect utils vctrs utf8 pkgconfig withr graphics grDevices grid gtable isoband S7 scales stats farver labeling RColorBrewer viridisLite stringi tools assertthat bit64 purrr bi
     permissions:
       repository-projects: read
       pages: write
