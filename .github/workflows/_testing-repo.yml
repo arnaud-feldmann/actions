@@ -9,7 +9,7 @@ jobs:
   reuse-workflow-repo:
     uses: ./.github/workflows/deploy-cran-repo.yml
     with:
-      packages: cli
+      packages: disaggR tidyverse arrow
     permissions:
       repository-projects: read
       pages: write
